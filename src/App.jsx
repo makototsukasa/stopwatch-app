@@ -56,7 +56,7 @@ export default function App() {
 
   return (
     <Container
-    // 画面全体を張横揃えにして、スマホでも崩れにくいよう設定
+    // 画面全体を中央揃えにして、スマホでも崩れにくいよう設定
       sx={{
         width: "100%",
         minWidth: 320,
@@ -68,7 +68,6 @@ export default function App() {
         alignItems: "center",
         textAlign: "center",
         boxSizing: "border-box",
-        overflow: "hidden",
       }}
     >
       {/* 現在の経過時間を表示 */}
