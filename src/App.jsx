@@ -1,49 +1,80 @@
-import { useState, useEffect } from 'react'
-import { Button, Container, Typography, Stack } from "@mui/material";
+import './App.css';
+import { useState, useRef } from 'react'
+import { Box, Button, Typography, Container } from "@mui/material";
 
-function App() {
+export default function App() {
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
+  const intervalRef = useRef(null);
 
-  useEffect(() => {
-    let timer;
+  const startStop = () => {
     if (isRunning) {
-      timer = setInterval(() => setTime((t) => t + 10), 10);
+      clearInterval(intervalRef.current);
+    } else {
+      intervalRef.current = setInterval(() => {
+        setTime((prev) => prev + 0.01);
+      }, 10);
     }
-    return () => clearInterval(timer);
-  }, [isRunning]);
-
-  const formatTime = (ms) => {
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const displayMs = Math.floor((ms % 1000) / 10)
-      .toString()
-      .padStart(2, "0");
-    return `${minutes}:${(seconds % 60).toString().padStart(2, "0")}.${displayMs}`;
+    setIsRunning(!isRunning);
   };
 
+  const reset = () => {
+    clearInterval(intervalRef.current);
+    setTime(0);
+    setIsRunning(false);
+  };
+
+  const formatTime = (t) => {
+    const minutes = Math.floor(t / 60);
+    const seconds = Math.floor(t % 60);
+    const centiseconds = Math.floor((t % 1) * 100);
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${centiseconds.toString().padStart(2, '0')}`;
+  }
+
   return (
-    <Container maxWidth="xs" sx={{ textAlign: "center", mt: 10 }}>
-      <Typography variant="h4" gutterButtom>
-        ストップウォッチ
-      </Typography>
-      <Typography variant="h3" sx={{ mb: 4 }}>
+    <Container
+      sx={{
+        width: "100%",
+        minWidth: 320,
+        height: "100vh",
+        minHeight: 568,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        textAlign: "center",
+        boxSizing: "border-box", // paddingやborderを含める
+      }}
+    >
+      <Typography
+        variant="h2"
+        sx={{
+          fontVariantNumeric: "tabular-nums",
+          fontFamily: "Fira Code",
+          mb: 3 ,
+          color: "white"
+        }}
+      >
         {formatTime(time)}
       </Typography>
-      <Stack direction="row" spacing={2} justifyContent="center">
+
+      <Box sx={{ display: "flex", gap: 2 }}>
         <Button
           variant="contained"
           color={isRunning ? "error" : "primary"}
-          onClick={() => setIsRunning(!isRunning)}
+          onClick={startStop}
+          sx={{ width: 100 }}
         >
           {isRunning ? "停止" : "開始"}
         </Button>
-        <Button variant="outlined" onClick={() => setTime(0)}>
+        <Button
+          variant="outlined"
+          onClick={reset}
+          sx={{ width: 100 }}
+        >
           リセット
         </Button>
-      </Stack>
+      </Box>
     </Container>
   );
 }
-
-export default App;
