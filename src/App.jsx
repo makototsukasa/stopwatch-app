@@ -68,6 +68,7 @@ export default function App() {
         alignItems: "center",
         textAlign: "center",
         boxSizing: "border-box",
+        overflow: "hidden",
       }}
     >
       {/* 現在の経過時間を表示 */}
