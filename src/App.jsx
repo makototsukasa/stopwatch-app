@@ -60,7 +60,7 @@ export default function App() {
       sx={{
         width: "100%",
         minWidth: 320,
-        height: "100dvh",
+        height: "100svh",
         minHeight: 568,
         display: "flex",
         flexDirection: "column",
