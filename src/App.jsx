@@ -1,16 +1,37 @@
+// App.jsx
+// ストップウォッチアプリ（React + Material UI + Vite）
+
 import './App.css';
-import { useState, useRef } from 'react'
-import { Box, Button, Typography, Container } from "@mui/material";
+import { useState, useRef, useEffect } from 'react'
+import { Box, Button, Typography, Container, useTheme } from "@mui/material";
+import { appSourceCodePromise } from './code';
 
 export default function App() {
+  // MUIテーマ（色など）を取得
+  const theme = useTheme();
+  // 経過時間（100分の1秒単位）
   const [time, setTime] = useState(0);
+  // ストップウォッチの動作状態
   const [isRunning, setIsRunning] = useState(false);
+  // ソースコード表示のON/OFF
+  const [showCode, setShowCode] = useState(false);
+  // ソースコードの文字列（ビルド時にcode.jsから非同期で受け取る）
+  const [appSourceCode, setAppSourceCode] = useState('');
+  // setIntervalのIDを保持するための参照
   const intervalRef = useRef(null);
 
+  // App.jsxのソースコードをビルド時に読み込む
+  useEffect(() => {
+    appSourceCodePromise.then(setAppSourceCode);
+  }, []);
+
+  // 開始/停止ボタンが押されたときの処理
   const startStop = () => {
     if (isRunning) {
+      // 停止中 ... intervalをクリア
       clearInterval(intervalRef.current);
     } else {
+      // 開始 ... 0.01秒ごとにtimeを更新
       intervalRef.current = setInterval(() => {
         setTime((prev) => prev + 0.01);
       }, 10);
@@ -18,12 +39,14 @@ export default function App() {
     setIsRunning(!isRunning);
   };
 
+  // リセットボタンが押されたときの処理
   const reset = () => {
     clearInterval(intervalRef.current);
     setTime(0);
     setIsRunning(false);
   };
 
+  // 時間を「MM:SS:CC（分:秒:センチ秒）」形式に整形する関数
   const formatTime = (t) => {
     const minutes = Math.floor(t / 60);
     const seconds = Math.floor(t % 60);
@@ -33,6 +56,7 @@ export default function App() {
 
   return (
     <Container
+    // 画面全体を張横揃えにして、スマホでも崩れにくいよう設定
       sx={{
         width: "100%",
         minWidth: 320,
@@ -43,22 +67,25 @@ export default function App() {
         justifyContent: "center",
         alignItems: "center",
         textAlign: "center",
-        boxSizing: "border-box", // paddingやborderを含める
+        boxSizing: "border-box",
       }}
     >
+      {/* 現在の経過時間を表示 */}
       <Typography
         variant="h2"
         sx={{
           fontVariantNumeric: "tabular-nums",
           fontFamily: "Fira Code",
           mb: 3 ,
-          color: "white"
         }}
       >
         {formatTime(time)}
       </Typography>
 
+      {/* 開始/停止ボタンとリセットボタンの配置場所 */}
       <Box sx={{ display: "flex", gap: 2 }}>
+
+        {/* 開始/停止ボタン */}
         <Button
           variant="contained"
           color={isRunning ? "error" : "primary"}
@@ -67,6 +94,8 @@ export default function App() {
         >
           {isRunning ? "停止" : "開始"}
         </Button>
+
+        {/* リセットボタン */}
         <Button
           variant="outlined"
           onClick={reset}
@@ -75,6 +104,46 @@ export default function App() {
           リセット
         </Button>
       </Box>
+
+      {/* ソースコード表示切替ボタン */}
+      <Button
+        variant="text"
+        onClick={() => setShowCode(!showCode)}
+        color="secondary"
+        sx={{ mt: 3}}
+      >
+        {showCode ? "ソースコードを閉じる" : "ソースコードをみる"}
+      </Button>
+
+      {/* ソースコード表示部分（開かれているときのみ描画） */}
+      {showCode && (
+        <Box
+          sx={{
+            mt: 2,
+            p: 2,
+            width: "90%",
+            maxHeight: "50vh",
+            overflowY: "auto",
+            fontSize: "0.8rem",
+            borderRadius: 1,
+            textAlign: "left",
+            border: `1px solid ${theme.palette.divider}`,
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+            overflowX: "hidden",
+          }}
+        >
+          <pre
+            style={{
+              margin: 0,
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+            }}
+          >
+            {appSourceCode}
+          </pre>
+        </Box>
+      )}
     </Container>
   );
 }
